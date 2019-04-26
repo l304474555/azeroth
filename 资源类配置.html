@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>资源类配置</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lib/layui/css/layui.css">
+    <link rel="stylesheet" href="css/scroll-bar.css">
+    <link rel="stylesheet" href="css/sub-page.css">
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_693759_wytlyqhtdtj1nhfr.css">
+    <link rel="stylesheet" href="lib/nprogress/nprogress.css">
+</head>
+<body>
+<div class="layui-element">
+    <!--导航区域-->
+    <div class="layui-tab">
+        <ul class="layui-tab-title">
+            <li class="layui-this">基础设施层</li>
+            <li>虚拟资源层</li>
+            <li>平台资源层</li>
+            <li>业务应用层</li>
+            <li>管理资源层</li>
+        </ul>
+        <!--导航内容-->
+        <div class="layui-tab-content">
+            <!--基础设施层-->
+            <div class="layui-tab-item layui-show">
+                <div>
+                    <button class="layui-btn ">添加属性</button>
+                    <button class="layui-btn layui-btn-primary">添加类关系</button>
+                </div>
+                <div class="layui-row">
+                    <div class="layui-col-xs2">
+                        <div >2/12</div>
+                    </div>
+                    <div class="layui-col-xs10">
+                        <div>8/12</div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="layui-tab-item">内容2</div>
+            <div class="layui-tab-item">内容3</div>
+            <div class="layui-tab-item">内容4</div>
+            <div class="layui-tab-item">内容5</div>
+        </div>
+    </div>
+
+</div>
+<!--js逻辑-->
+<script src="lib/layui/layui.js"></script>
+<script src="lib/nprogress/nprogress.js"></script>
+<script>
+    NProgress.start();
+    window.onload = function () {
+        NProgress.done();
+    }
+    layui.use(['element', 'table', 'form', 'jquery', 'laydate'], function () {
+        var element = layui.element;
+        var table = layui.table;
+        var form = layui.form;
+        var $ = layui.jquery;
+        var laydate = layui.laydate;
+
+        laydate.render({
+            elem: '#startTime',
+            type: "datetime"
+        });
+
+        laydate.render({
+            elem: '#endTime',
+            type: "datetime"
+        });
+
+
+    })
+</script>
+
+</body>
+</html>
