@@ -9,9 +9,10 @@
     <link rel="stylesheet" href="css/sub-page.css">
     <link rel="stylesheet" href="//at.alicdn.com/t/font_693759_wytlyqhtdtj1nhfr.css">
     <link rel="stylesheet" href="lib/nprogress/nprogress.css">
+    <link rel="stylesheet" href="css/page.css">
 </head>
 <body>
-<div class="layui-element">
+<div class="layui-element" id="vue-element">
     <!--导航区域-->
     <div class="layui-tab">
         <ul class="layui-tab-title">
@@ -25,20 +26,20 @@
         <div class="layui-tab-content">
             <!--基础设施层-->
             <div class="layui-tab-item layui-show">
-                <div>
+                <div class="head-title-box">
                     <button class="layui-btn ">添加属性</button>
                     <button class="layui-btn layui-btn-primary">添加类关系</button>
                 </div>
                 <div class="layui-row">
+                    <!--左边导航-->
                     <div class="layui-col-xs2">
-                        <div >2/12</div>
+                        <div class="left-nav-box">12222</div>
                     </div>
+                    <!--基本信息-->
                     <div class="layui-col-xs10">
                         <div>8/12</div>
                     </div>
-
                 </div>
-
             </div>
             <div class="layui-tab-item">内容2</div>
             <div class="layui-tab-item">内容3</div>
@@ -50,6 +51,7 @@
 </div>
 <!--js逻辑-->
 <script src="lib/layui/layui.js"></script>
+<script src="js/vue.min.js"></script>
 <script src="lib/nprogress/nprogress.js"></script>
 <script>
     NProgress.start();
@@ -72,8 +74,20 @@
             elem: '#endTime',
             type: "datetime"
         });
+    })
+</script>
+<!-- vueJs -->
+<script>
+    new Vue({
+        el: '#vue-element',
+        data() {
+            return{
+                
+            }
+        },
+        methods: {
 
-
+        }
     })
 </script>
 

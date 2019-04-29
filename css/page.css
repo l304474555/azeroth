@@ -1,0 +1,16 @@
+/* public CSS */
+.related{
+    position: relative;
+}
+.absolute{
+    position: absolute;
+}
+/* 资源配置 */
+
+.head-title-box{
+    padding: 0px 20px 10px;
+}
+.left-nav-box{
+    background: #666;
+    /*position: absolute;*/
+}
