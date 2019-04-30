@@ -5,12 +5,41 @@
 .absolute{
     position: absolute;
 }
+.bg-gary{
+    background: rgb(242,242,242);
+}
 /* 资源配置 */
 
 .head-title-box{
     padding: 0px 20px 10px;
 }
-.left-nav-box{
-    background: #666;
-    /*position: absolute;*/
+.layui-tab-item{
+    height: 100%;
 }
+.layui-row{
+    position: relative;
+}
+.left-nav-box{
+    min-height: 500px;
+}
+.active{
+    background: #0C0C0C;
+    color: white;
+}
+.left-nav-item{
+    padding: 10px 20px;
+    font-weight: 700;
+    font-size: 15px;
+}
+.left-nav-btn{
+    padding: 10px 20px;
+}
+.left-nav-item:hover{
+    background: rgb(78,84,101);
+    color: white;
+    cursor: pointer;
+}
+.left-nav-item>img{
+    float: right;
+}
+
