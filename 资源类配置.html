@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="css/sub-page.css">
     <link rel="stylesheet" href="//at.alicdn.com/t/font_693759_wytlyqhtdtj1nhfr.css">
     <link rel="stylesheet" href="lib/nprogress/nprogress.css">
-    <link rel="stylesheet" href="css/page.css">
+    <link rel="stylesheet" href="css/page.css?2">
 </head>
 <body>
 <div class="layui-element" id="vue-element">
@@ -24,7 +24,7 @@
         </ul>
         <!--导航内容-->
         <div class="layui-tab-content">
-            <!--基础设施层-->
+            <!--基础设施层start-->
             <div class="layui-tab-item layui-show">
                 <div class="head-title-box">
                     <button class="layui-btn ">添加属性</button>
@@ -34,7 +34,7 @@
                     <!--左边导航-->
                     <div class="layui-col-xs2 related">
                         <div class="left-nav-box bg-gary">
-                            <div class="left-nav-item" v-for="item in leftNav" :key="item.id" :class="item.selected?'active':''" v-on:click="selectNav(item)">
+                            <div class="left-nav-item" v-for="item in left_nav" :key="item.id" :class="item.selected?'active':''" v-on:click="selectNav(item)">
                                 {{ item.name }}
                                 <img src="images/edit.png" v-on:click.stop="navEdit">
                             </div>
@@ -46,54 +46,119 @@
                     <!--基本信息-->
                     <div class="layui-col-xs10">
                         <div class="layui-row">
-                            <div class="layui-col-md12">
-                                <div class="grid-demo">内部列</div>
+                            <div class="layui-col-xs9">
+                                <div class="form-box">
+                                    <div class="form-head">
+                                        基本信息
+                                    </div>
+                                    <div class="form-item-box">
+                                        <drop class="form-item"
+                                              v-for="item of cur_select.attr"
+                                              @drop="handleDrop">
+                                            <div class="form-item-head">
+                                                {{ item.title }}：
+                                            </div>
+                                            <div class="form-item-center">
+                                                <input type="text" name="title" autocomplete="off" :placeholder="'请输入' + item.title" class="layui-input"/>
+                                            </div>
+                                            <div class="form-item-right" v-if="item.hasRightText">
+                                                * 名称为固定选项，不可去除；
+                                            </div>
+                                        </drop>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="layui-col-md9">
-                                <div class="grid-demo grid-demo-bg2">内部列</div>
-                            </div>
-                            <div class="layui-col-md3">
-                                <div class="grid-demo grid-demo-bg3">内部列</div>
+                            <div class="layui-col-xs3">
+                                <div class="drap-box">
+                                    <drag class="drap-item"
+                                          v-for="item of drap_icon"
+                                          :key="item.title"
+                                          :transfer-data="item"
+                                          :effect-allowed="['copy']"
+                                          drop-effect="copy"
+                                    >
+                                    <span>
+                                        <img :src="item.src">
+                                    </span>
+                                        <span style="margin-top: 5px">
+                                        {{ item.title }}
+                                    </span>
+                                    </drag>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    </div>
                 </div>
             </div>
-            <div class="layui-tab-item">内容2</div>
-            <div class="layui-tab-item">内容3</div>
-            <div class="layui-tab-item">内容4</div>
-            <div class="layui-tab-item">内容5</div>
+            <!--基础设施层end-->
+            <div class="layui-tab-item">虚拟资源层</div>
+            <div class="layui-tab-item">平台资源层</div>
+            <div class="layui-tab-item">业务应用层</div>
+            <div class="layui-tab-item">管理资源层</div>
         </div>
     </div>
 
+
+    <!--拖拽弹窗-->
+    <div class="msg-box" v-show="msgBoxShow">
+        <div class="msg-box-bg"></div>
+        <div class="msg-content-box">
+            <div class="msg-content-title">
+                添加属性 - {{ cur_drap.title }}
+                <i class="layui-icon layui-icon-close" v-on:click="msgBoxShow=false" style="float: right;cursor: pointer"></i>
+            </div>
+            <div class="msg-content">
+                <form class="layui-form 123">
+                    <div class="msg-content-item" v-for="item of cur_drap.parm">
+                        <div class="msg-content-item-title"><span class="red" v-if="item.required">*</span>{{ item.lable }}：</div>
+                        <div class="msg-content-item-input" v-if="item.type=='text'">
+                            <input type="text" :placeholder="'请输入' + item.lable" v-model="item.value" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="msg-content-item-input" v-else-if="item.type=='select'&&item.name=='rules'" >
+                            <select name="rules" lay-verify="">
+                                <option value="">无校验</option>
+                                <option value="010">IP地址</option>
+                                <option value="021">邮箱</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </form>
+                <button class="layui-btn">保存</button>
+                <form class="layui-form 123">
+                    <div class="fff">
+                        <div class=" aaa">
+                            <select name="city" lay-verify="">
+                                <option value="">无校验</option>
+                                <option value="010">IP地址</option>
+                                <option value="021">邮箱</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <input type="checkbox" name="" title="发呆">
+                        <input type="checkbox" name="" title="禁用" disabled>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 <!--js逻辑-->
 <script src="lib/layui/layui.js"></script>
 <script src="js/vue.min.js"></script>
 <script src="lib/nprogress/nprogress.js"></script>
+<!--拖拽-->
+<script src="js/sortable.js"></script>
+<script src="js/vuedraggable.js"></script>
+<script src="js/vue-drag-drop.browser.js"></script>
 <script>
     NProgress.start();
     window.onload = function () {
         NProgress.done();
     }
-    layui.use(['element', 'table', 'form', 'jquery', 'laydate'], function () {
-        var element = layui.element;
-        var table = layui.table;
-        var form = layui.form;
-        var $ = layui.jquery;
-        var laydate = layui.laydate;
 
-        laydate.render({
-            elem: '#startTime',
-            type: "datetime"
-        });
 
-        laydate.render({
-            elem: '#endTime',
-            type: "datetime"
-        });
-    })
 </script>
 <!-- vueJs -->
 <script>
@@ -101,10 +166,20 @@
         el: '#vue-element',
         data() {
             return{
-                leftNav:[{
+                /* 基础设施层 */
+                // 左边导航
+                left_nav:[{
                     id: 0,
                     name: '机房',
-                    selected: true
+                    selected: true,
+                    attr: [{
+                        title: '名称',
+                        required: true,
+                        hasRightText: true
+                    }],
+                    class: {
+
+                    }
                 },{
                     id: 1,
                     name: '机柜',
@@ -113,15 +188,161 @@
                     id: 2,
                     name: 'PC服务器',
                     selected: false
-                },]
+                },],
+                cur_select: {},
+                cur_drap: {},
+                msgBoxShow: false,
+                // 拖拽图标
+                drap_icon:[
+                    {
+                        title: "单行文本",
+                        type: 'text',
+                        src: 'images/d-text.png',
+                        parm: [{
+                            name: 'name',
+                            lable: '字段名称',
+                            value: '',
+                            type: 'text',
+                            required: true
+                        },{
+                            name: 'default',
+                            lable: '默认值',
+                            value: '',
+                            type: 'text',
+                            required: false
+                        },{
+                            name: 'required',
+                            lable: '是否必填',
+                            value: false,
+                            type: 'check',
+                            required: false
+                        },{
+                            name: 'rules',
+                            lable: '校验规则',
+                            value: '',
+                            type: 'select',
+                            required: false
+                        },{
+                            name: 'minLength',
+                            lable: '最小文本长度',
+                            value: '',
+                            type: 'number',
+                            required: false
+                        },{
+                            name: 'maxLength',
+                            lable: '最大文本长度',
+                            value: '',
+                            type: 'number',
+                            required: false
+                        }]
+                    },{
+                    title: "多行文本",
+                    type: 'textarea',
+                    src: 'images/d-textarea.png',
+                    name: '',
+                    default: '',
+                    required: false,
+                    rules: '',
+                    minLength: '',
+                    maxLength: '',
+                },{
+                    title: "数值",
+                    type: 'number',
+                    src: 'images/d-textarea.png',
+                    name: '',
+                    default: '',
+                    required: false,
+                    rules: '',
+                    minLength: '',
+                    maxLength: '',
+                },{
+                    title: "下拉",
+                    type: 'number',
+                    src: 'images/d-select.png',
+                    name: '',
+                    default: '',
+                    required: false,
+                    rules: '',
+                    minLength: '',
+                    maxLength: '',
+                },{
+                    title: "多选",
+                    type: 'number',
+                    src: 'images/d-checkgroup.png',
+                    name: '',
+                    default: '',
+                    required: false,
+                    rules: '',
+                    minLength: '',
+                    maxLength: '',
+                },{
+                    title: "单选",
+                    type: 'number',
+                    src: 'images/d-check.png',
+                    name: '',
+                    default: '',
+                    required: false,
+                    rules: '',
+                    minLength: '',
+                    maxLength: '',
+                },{
+                    title: "日期和时间",
+                    type: 'number',
+                    src: 'images/d-date.png',
+                    name: '',
+                    default: '',
+                    required: false,
+                    rules: '',
+                    minLength: '',
+                    maxLength: '',
+                },{
+                    title: "属性分组",
+                    type: 'number',
+                    src: 'images/d-group.png'
+                },{
+                    title: "表格",
+                    type: 'number',
+                    src: 'images/d-table.png'
+                },{
+                    title: "引用",
+                    type: 'number',
+                    src: 'images/d-quote.png'
+                },{
+                    title: "附件",
+                    type: 'number',
+                    src: 'images/d-file.png'
+                }],
+                form:{}
             }
         },
+        created() {
+            this.selectNav(this.left_nav[0])
+        },
+        mounted() {
+            var that = this
+
+        },
+        updated: function () {
+
+        },
         methods: {
+            handleDrop(data) {
+                console.log(data)
+                if(!data){ return }
+                this.cur_drap = data
+                this.msgBoxShow = true
+                this.$nextTick(function () {
+                    layui.use(['form'], function(){
+                        layui.form.render()
+                    });
+                });
+            },
             selectNav(item) {
-                this.leftNav.forEach((i)=>{
+                this.left_nav.forEach((i)=>{
                     i.selected = false
                     if(i.id == item.id){
                         i.selected = true
+                        this.cur_select = i
                     }
                 })
             },
