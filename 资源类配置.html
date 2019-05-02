@@ -7,9 +7,10 @@
     <link rel="stylesheet" href="lib/layui/css/layui.css">
     <link rel="stylesheet" href="css/scroll-bar.css">
     <link rel="stylesheet" href="css/sub-page.css">
-    <link rel="stylesheet" href="//at.alicdn.com/t/font_693759_wytlyqhtdtj1nhfr.css">
+    <!--<link rel="stylesheet" href="//at.alicdn.com/t/font_693759_wytlyqhtdtj1nhfr.css">-->
     <link rel="stylesheet" href="lib/nprogress/nprogress.css">
     <link rel="stylesheet" href="css/page.css?2">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
 </head>
 <body>
 <div class="layui-element" id="vue-element">
@@ -100,49 +101,48 @@
 
 
     <!--拖拽弹窗-->
-    <div class="msg-box" v-show="msgBoxShow">
-        <div class="msg-box-bg"></div>
-        <div class="msg-content-box">
-            <div class="msg-content-title">
-                添加属性 - {{ cur_drap.title }}
-                <i class="layui-icon layui-icon-close" v-on:click="msgBoxShow=false" style="float: right;cursor: pointer"></i>
-            </div>
-            <div class="msg-content">
-                <form class="layui-form 123">
-                    <div class="msg-content-item" v-for="item of cur_drap.parm">
-                        <div class="msg-content-item-title"><span class="red" v-if="item.required">*</span>{{ item.lable }}：</div>
-                        <div class="msg-content-item-input" v-if="item.type=='text'">
-                            <input type="text" :placeholder="'请输入' + item.lable" v-model="item.value" autocomplete="off" class="layui-input">
+    <template v-if="msgBoxShow">
+        <div class="msg-box" >
+            <div class="msg-box-bg"></div>
+            <div class="msg-content-box">
+                <div class="msg-content-title">
+                    添加属性 - {{ cur_drap.title }}
+                    <i class="layui-icon layui-icon-close" v-on:click="msgBoxShow=false" style="float: right;cursor: pointer"></i>
+                </div>
+                <div class="msg-content">
+                    <form class="layui-form 123">
+                        <div class="msg-content-item" v-for="item of cur_drap.parm">
+                            <div class="msg-content-item-title">
+                                <span class="red" v-if="item.required">*</span>{{ item.lable }}：
+                                <div v-if="item.type=='pulldown'&&item.name=='pulldown'" class="layui-btn layui-btn-sm" style="float: right" v-on:click="addOption(item)">添加</div>
+                            </div>
+                            <div class="msg-content-item-input" v-if="item.name=='required'">
+                                <input type="checkbox" name="close" v-model="item.value" ref="required" lay-skin="switch" lay-text="是|否">
+                            </div>
+                            <div class="msg-content-item-input" v-if="item.type=='text'||item.type=='number'">
+                                <input :type="item.type" :placeholder="'请输入' + item.lable" v-model="item.value" autocomplete="off" class="layui-input">
+                            </div>
+                            <div class="msg-content-item-input" v-else-if="item.type=='select'&&item.name=='rules'" >
+                                <select name="rules" lay-verify="" v-model="item.value" ref="rules">
+                                    <option value="111">无校验</option>
+                                    <option value="010">IP地址</option>
+                                    <option value="021">邮箱</option>
+                                </select>
+                            </div>
+                            <div class="msg-content-item-input" v-else-if="item.type=='pulldown'&&item.name=='pulldown'" >
+                                <div v-for="(op,i) of item.options" :key="i" class="msg-content-item-pulldown">
+                                    <i :class="op.isSelect?'fa fa-check-circle':'fa fa-circle-thin'" class="pulldown-hover" aria-hidden="true" v-on:click="checkOption(item,i)"></i>
+                                    <input v-model="op.name" placeholder="请输入选项名称"/>
+                                    <i class="fa fa-trash-o" v-on:click="item.options.splice(i,1)"></i>
+                                </div>
+                            </div>
                         </div>
-                        <div class="msg-content-item-input" v-else-if="item.type=='select'&&item.name=='rules'" >
-                            <select name="rules" lay-verify="">
-                                <option value="">无校验</option>
-                                <option value="010">IP地址</option>
-                                <option value="021">邮箱</option>
-                            </select>
-                        </div>
-
-                    </div>
-                </form>
-                <button class="layui-btn">保存</button>
-                <form class="layui-form 123">
-                    <div class="fff">
-                        <div class=" aaa">
-                            <select name="city" lay-verify="">
-                                <option value="">无校验</option>
-                                <option value="010">IP地址</option>
-                                <option value="021">邮箱</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="layui-form-item">
-                        <input type="checkbox" name="" title="发呆">
-                        <input type="checkbox" name="" title="禁用" disabled>
-                    </div>
-                </form>
+                    </form>
+                    <button class="layui-btn" @click="saveDrap">保存</button>
+                </div>
             </div>
         </div>
-    </div>
+    </template>
 </div>
 <!--js逻辑-->
 <script src="lib/layui/layui.js"></script>
@@ -198,7 +198,8 @@
                         title: "单行文本",
                         type: 'text',
                         src: 'images/d-text.png',
-                        parm: [{
+                        parm: [
+                            {
                             name: 'name',
                             lable: '字段名称',
                             value: '',
@@ -236,36 +237,121 @@
                             required: false
                         }]
                     },{
-                    title: "多行文本",
-                    type: 'textarea',
-                    src: 'images/d-textarea.png',
-                    name: '',
-                    default: '',
-                    required: false,
-                    rules: '',
-                    minLength: '',
-                    maxLength: '',
+                        title: "多行文本",
+                        type: 'textarea',
+                        src: 'images/d-textarea.png',
+                        parm: [
+                            {
+                                name: 'name',
+                                lable: '字段名称',
+                                value: '',
+                                type: 'text',
+                                required: true
+                            },{
+                                name: 'default',
+                                lable: '默认值',
+                                value: '',
+                                type: 'text',
+                                required: false
+                            },{
+                                name: 'required',
+                                lable: '是否必填',
+                                value: false,
+                                type: 'check',
+                                required: false
+                            },{
+                                name: 'rules',
+                                lable: '校验规则',
+                                value: '',
+                                type: 'select',
+                                required: false
+                            },{
+                                name: 'minLength',
+                                lable: '最小文本长度',
+                                value: '',
+                                type: 'number',
+                                required: false
+                            },{
+                                name: 'maxLength',
+                                lable: '最大文本长度',
+                                value: '',
+                                type: 'number',
+                                required: false
+                            }]
                 },{
-                    title: "数值",
-                    type: 'number',
-                    src: 'images/d-textarea.png',
-                    name: '',
-                    default: '',
-                    required: false,
-                    rules: '',
-                    minLength: '',
-                    maxLength: '',
-                },{
-                    title: "下拉",
-                    type: 'number',
-                    src: 'images/d-select.png',
-                    name: '',
-                    default: '',
-                    required: false,
-                    rules: '',
-                    minLength: '',
-                    maxLength: '',
-                },{
+                        title: "数值",
+                        type: 'number',
+                        src: 'images/d-textarea.png',
+                        parm: [
+                            {
+                                name: 'name',
+                                lable: '字段名称',
+                                value: '',
+                                type: 'text',
+                                required: true
+                            },{
+                                name: 'default',
+                                lable: '默认值',
+                                value: '',
+                                type: 'text',
+                                required: false
+                            },{
+                                name: 'unit',
+                                lable: '单位',
+                                value: '',
+                                type: 'text',
+                                required: false
+                            },{
+                                name: 'required',
+                                lable: '是否必填',
+                                value: false,
+                                type: 'check',
+                                required: false
+                            },{
+                                name: 'minDigit',
+                                lable: '最小位数',
+                                value: '',
+                                type: 'number',
+                                required: false
+                            },{
+                                name: 'minLength',
+                                lable: '最小文本长度',
+                                value: '',
+                                type: 'number',
+                                required: false
+                            },{
+                                name: 'maxLength',
+                                lable: '最大文本长度',
+                                value: '',
+                                type: 'number',
+                                required: false
+                            }]
+                    },{
+                        title: "下拉",
+                        type: 'number',
+                        src: 'images/d-select.png',
+                        parm: [
+                            {
+                                name: 'name',
+                                lable: '字段名称',
+                                value: '',
+                                type: 'text',
+                                required: true
+                            },{
+                                name: 'required',
+                                lable: '是否必填',
+                                value: false,
+                                type: 'check',
+                            },{
+                                name: 'pulldown',
+                                lable: '选项',
+                                value: '',
+                                type: 'pulldown',
+                                options: []
+                            }]
+
+
+                    },{
                     title: "多选",
                     type: 'number',
                     src: 'images/d-checkgroup.png',
@@ -322,20 +408,27 @@
             var that = this
 
         },
-        updated: function () {
-
-        },
         methods: {
             handleDrop(data) {
                 console.log(data)
                 if(!data){ return }
-                this.cur_drap = data
+                this.cur_drap = JSON.parse(JSON.stringify(data))
                 this.msgBoxShow = true
                 this.$nextTick(function () {
                     layui.use(['form'], function(){
                         layui.form.render()
                     });
                 });
+            },
+            saveDrap() {
+                // this.msgBoxShow = false
+                var rules = this.$refs.rules ? this.$refs.rules[0].value : ''
+                var required = this.$refs.required ? this.$refs.required[0].checked : ''
+                this.cur_drap.parm.forEach((item)=>{
+                    if(rules && item.name=='rules'){ item.value = rules }
+                    if(required && item.name=='required'){ item.value = required }
+                })
+                console.log(this.cur_drap.parm)
             },
             selectNav(item) {
                 this.left_nav.forEach((i)=>{
@@ -345,6 +438,24 @@
                         this.cur_select = i
                     }
                 })
+            },
+            addOption(item){
+                console.log(item)
+                item.options.push({
+                    isSelect: false,
+                    name: ''
+                })
+                this.$nextTick(function () {
+                    layui.use(['form'], function(){
+                        layui.form.render()
+                    });
+                });
+            },
+            checkOption(item,index) {
+              item.options.forEach((i)=>{
+                  i.isSelect = false
+                  item.options[index].isSelect = true
+              })
             },
             navEdit() {
                 console.log(123)

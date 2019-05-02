@@ -116,7 +116,6 @@
     left: 50%;
     transform: translate(-50%,0);
     width: 50%;
-    border: 1px solid rgba(0,0,0,.1);;
     background: white;
     font-size: 15px;
 
@@ -135,4 +134,32 @@
 .msg-content-item{
     margin-bottom: 25px;
 }
-
+.msg-content-item-pulldown{
+    margin: 10px;
+}
+.msg-content-item-pulldown>i{
+    color: #b7b7b7;
+    cursor: pointer;
+    font-size: 18px;
+    position: relative;
+}
+.msg-content-item-pulldown>input{
+    padding: 5px 10px;
+    border: 1px solid #e0e0e0;
+    margin: 0 10px;
+}
+.pulldown-hover:hover:after {
+    position: absolute;
+    left: 22px;
+    top: -12px;
+    font-size: 15px;
+    padding: 5px;
+    text-align: center;
+    background-color: rgba(0,0,0,0.5);
+    color: #fff;
+    content: '设为默认值';
+    padding: 15px 10px;
+    z-index: 2;
+    width: 100px;
+}
+}
