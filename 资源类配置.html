@@ -35,15 +35,15 @@
                     <!--左边导航-->
                     <div class="layui-col-xs2 related">
                         <div class="left-nav-box bg-gary">
-                        	<template>
-                        		<div class="left-nav-item" v-for="item in left_nav" :key="item.id" :class="item.selected?'active':''" v-on:click="selectNav(item)">
-	                                {{ item.name }}
-	                                <img src="images/edit.png" v-on:click.stop="navEdit">
-	                            </div>
-	                            <div class="left-nav-btn">
-	                                <button class="layui-btn layui-btn-sm">添加资源类</button>
-	                            </div>
-                        	</template>
+                            <template>
+                                <div class="left-nav-item" v-for="item in left_nav" :key="item.id" :class="item.selected?'active':''" v-on:click="selectNav(item)">
+                                    {{ item.name }}
+                                    <img src="images/edit.png" v-on:click.stop="navEdit">
+                                </div>
+                                <div class="left-nav-btn">
+                                    <button class="layui-btn layui-btn-sm">添加资源类</button>
+                                </div>
+                            </template>
                         </div>
                     </div>
                     <!--基本信息-->
@@ -56,13 +56,19 @@
                                     </div>
                                     <drop class="form-item-box" @drop="handleDrop">
                                         <div class="form-item"
-                                              v-for="item of cur_select.attr"
-                                              >
+                                             v-for="item of cur_select.attr"
+                                        >
                                             <div class="form-item-head">
-                                                {{ item.title }}<span class="red" v-if='item.required'>*</span>：
+                                                {{ item.title }} <span class="red" v-if='item.required'>*</span>：
                                             </div>
                                             <div class="form-item-center">
-                                                <input v-if="item.type=='text'||item.type=='textarea'" v-model="item.value" type="text" name="title" autocomplete="off" :placeholder="'请输入' + item.title" class="layui-input"/>
+                                                <form class="layui-form">
+                                                    <input v-if="item.type=='text'||item.type=='number'" v-model="item.value" :type="item.type" name="title" autocomplete="off" :placeholder="'请输入' + item.title" class="layui-input"/>
+                                                    <textarea v-if="item.type=='textarea'" v-model="item.value" autocomplete="off" :placeholder="'请输入' + item.title" class="layui-textarea"></textarea>
+                                                    <select v-if="item.type=='pulldown'" v-model="item.value">
+                                                        <option v-for="op of item.options" :value="op.opName">{{op.opName}}</option>
+                                                    </select>
+                                                </form>
                                             </div>
                                             <div class="form-item-right" v-if="item.hasRightText">
                                                 * 名称为固定选项，不可去除；
@@ -112,38 +118,33 @@
                     <i class="layui-icon layui-icon-close" v-on:click="msgBoxShow=false" style="float: right;cursor: pointer"></i>
                 </div>
                 <div class="msg-content">
-                    <form class="layui-form 123">
+                    <form class="layui-form">
                         <div class="msg-content-item" v-for="item of cur_drap.parm">
                             <div class="msg-content-item-title">
                                 <span class="red" v-if="item.required">*</span>{{ item.lable }}：
                                 <div v-if="item.type=='options'" class="layui-btn layui-btn-sm" style="float: right" v-on:click="addOption(item)">添加</div>
                             </div>
-                            <div class="msg-content-item-input" v-if="item.name=='required'">
-                                <input type="checkbox" name="close" v-model="item.value" ref="required" lay-skin="switch" lay-text="是|否">
-                            </div>
-                            <div class="msg-content-item-input" v-if="item.name=='required_data'">
-                                <input type="checkbox" name="close" v-model="item.value" ref="required_data" lay-skin="switch" lay-text="是|否">
-                            </div>
-							<div class="msg-content-item-input" v-if="item.type=='dateTime'">
-                                 <input type="text" class="layui-input" id="laydata" v-model="item.value" ref='dateTime' placeholder="yyyy-MM-dd">
-                            </div>
-                            <div class="msg-content-item-input" v-if="item.type=='text'||item.type=='number'">
-                                <input :type="item.type" :placeholder="'请输入' + item.lable" v-model="item.value" autocomplete="off" class="layui-input">
-                                <div v-if="item.name=='code'" class="msg-content-item-tips">请输入3-30个字母或数字，且首个字符必须为字母；</div>
-                            </div>
-                            <div class="msg-content-item-input" v-else-if="item.type=='select'&&(item.name=='rules'||item.name=='useobj')" >
-                                <select name="rules" lay-verify="" v-model="item.value" ref="rules">
+                            <div class="msg-content-item-input" >
+                                <input type="checkbox" v-if="item.name=='required'" v-model="item.value" ref="required" lay-skin="switch" lay-text="是|否">
+                                <input type="checkbox" v-if="item.name=='required_data'" v-model="item.value" ref="required_data" lay-skin="switch" lay-text="是|否">
+                                <input type="text" v-if="item.type=='dateTime'" class="layui-input" id="laydata" v-model="item.value" ref='dateTime' placeholder="yyyy-MM-dd">
+                                <template v-if="item.type=='text'||item.type=='number'">
+                                    <input :type="item.type" :placeholder="'请输入' + item.lable" v-model="item.value" autocomplete="off" class="layui-input">
+                                    <div v-if="item.name=='code'" class="msg-content-item-tips">请输入3-30个字母或数字，且首个字符必须为字母；</div>
+                                </template>
+                                <select name="rules" v-if="item.type=='select'&&(item.name=='rules'||item.name=='useobj')" v-model="item.value" ref="rules">
+                                    <option value="">无校验1</option>
                                     <option value="111">无校验</option>
                                     <option value="010">IP地址</option>
                                     <option value="021">邮箱</option>
                                 </select>
-                            </div>
-                            <div class="msg-content-item-input" v-else-if="item.type=='options'&&(item.name=='options'||item.name=='table')" >
-                                <div v-for="(op,i) of item.options" :key="i" class="msg-content-item-pulldown">
-                                    <i :class="op.isSelect?'fa fa-check-circle':'fa fa-circle-thin'" class="pulldown-hover" v-if="item.name=='options'" aria-hidden="true" v-on:click="checkOption(item,i)"></i>
-                                    <input v-model="op.name" placeholder="请输入选项名称"/>
-                                    <i class="fa fa-trash-o" v-on:click="item.options.splice(i,1)"></i>
-                                </div>
+                                <template v-if="item.type=='options'&&(item.name=='options'||item.name=='table')">
+                                    <div v-for="(op,i) of item.options" :key="i" class="msg-content-item-pulldown">
+                                        <i :class="op.isSelect?'fa fa-check-circle':'fa fa-circle-thin'" class="pulldown-hover" v-if="item.name=='options'" aria-hidden="true" v-on:click="checkOption(item,i)"></i>
+                                        <input v-model="op.opName" placeholder="请输入选项名称"/>
+                                        <i class="fa fa-trash-o" v-on:click="item.options.splice(i,1)"></i>
+                                    </div>
+                                </template>
                             </div>
                         </div>
                     </form>
@@ -188,7 +189,7 @@
                         type: 'text',//类型
                         required: true,//是否必填
                         hasRightText: true,//显示（名称为固定选项，不可去除；）
-                        value:''//值
+                        value:'',//值
                     }],
                     //类关系
                     class: {
@@ -214,42 +215,42 @@
                         src: 'images/d-text.png',
                         parm: [
                             {
-                            name: 'name',
-                            lable: '字段名称',
-                            value: '',
-                            type: 'text',
-                            required: true
-                        },{
-                            name: 'default',
-                            lable: '默认值',
-                            value: '',
-                            type: 'text',
-                            required: false
-                        },{
-                            name: 'required',
-                            lable: '是否必填',
-                            value: false,
-                            type: 'check',
-                            required: false
-                        },{
-                            name: 'rules',
-                            lable: '校验规则',
-                            value: '',
-                            type: 'select',
-                            required: false
-                        },{
-                            name: 'minLength',
-                            lable: '最小文本长度',
-                            value: '',
-                            type: 'number',
-                            required: false
-                        },{
-                            name: 'maxLength',
-                            lable: '最大文本长度',
-                            value: '',
-                            type: 'number',
-                            required: false
-                        }]
+                                name: 'name',
+                                lable: '字段名称',
+                                value: '',
+                                type: 'text',
+                                required: true
+                            },{
+                                name: 'default',
+                                lable: '默认值',
+                                value: '',
+                                type: 'text',
+                                required: false
+                            },{
+                                name: 'required',
+                                lable: '是否必填',
+                                value: false,
+                                type: 'check',
+                                required: false
+                            },{
+                                name: 'rules',
+                                lable: '校验规则',
+                                value: '',
+                                type: 'select',
+                                required: false
+                            },{
+                                name: 'minLength',
+                                lable: '最小文本长度',
+                                value: '',
+                                type: 'number',
+                                required: false
+                            },{
+                                name: 'maxLength',
+                                lable: '最大文本长度',
+                                value: '',
+                                type: 'number',
+                                required: false
+                            }]
                     },{
                         title: "多行文本",
                         type: 'textarea',
@@ -292,7 +293,7 @@
                                 type: 'number',
                                 required: false
                             }]
-                },{
+                    },{
                         title: "数值",
                         type: 'number',
                         src: 'images/d-textarea.png',
@@ -364,10 +365,10 @@
                                 options: []
                             }]
                     },{
-                    title: "多选",
-                    type: 'checkbox',
-                    src: 'images/d-checkgroup.png',
-                    parm: [
+                        title: "多选",
+                        type: 'checkbox',
+                        src: 'images/d-checkgroup.png',
+                        parm: [
                             {
                                 name: 'name',
                                 lable: '字段名称',
@@ -386,11 +387,11 @@
                                 type: 'options',
                                 options: []
                             }]
-                },{
-                    title: "单选",
-                    type: 'radio',
-                    src: 'images/d-check.png',
-                    parm: [
+                    },{
+                        title: "单选",
+                        type: 'radio',
+                        src: 'images/d-check.png',
+                        parm: [
                             {
                                 name: 'name',
                                 lable: '字段名称',
@@ -409,11 +410,11 @@
                                 type: 'options',
                                 options: []
                             }]
-                },{
-                    title: "日期和时间",
-                    type: 'dateTime',
-                    src: 'images/d-date.png',
-                    parm: [
+                    },{
+                        title: "日期和时间",
+                        type: 'dateTime',
+                        src: 'images/d-date.png',
+                        parm: [
                             {
                                 name: 'name',
                                 lable: '字段名称',
@@ -436,15 +437,15 @@
                                 value: '',
                                 type: 'dateTime',
                             }]
-                },{
-                    title: "属性分组",
-                    type: 'number',
-                    src: 'images/d-group.png'
-                },{
-                    title: "表格",
-                    type: 'table',
-                    src: 'images/d-table.png',
-                    parm: [
+                    },{
+                        title: "属性分组",
+                        type: 'number',
+                        src: 'images/d-group.png'
+                    },{
+                        title: "表格",
+                        type: 'table',
+                        src: 'images/d-table.png',
+                        parm: [
                             {
                                 name: 'name',
                                 lable: '字段名称',
@@ -463,11 +464,11 @@
                                 type: 'options',
                                 options: []
                             }]
-                },{
-                    title: "引用",
-                    type: 'useobj',
-                    src: 'images/d-quote.png',
-                    parm: [
+                    },{
+                        title: "引用",
+                        type: 'useobj',
+                        src: 'images/d-quote.png',
+                        parm: [
                             {
                                 name: 'name',
                                 lable: '字段名称',
@@ -485,11 +486,11 @@
                                 value: '',
                                 type: 'select',
                             }]
-                },{
-                    title: "附件",
-                    type: 'file',
-                    src: 'images/d-file.png',
-                    parm: [
+                    },{
+                        title: "附件",
+                        type: 'file',
+                        src: 'images/d-file.png',
+                        parm: [
                             {
                                 name: 'name',
                                 lable: '字段名称',
@@ -508,7 +509,7 @@
                                 value: false,
                                 type: 'check',
                             }]
-                }],
+                    }],
                 form:{}
             }
         },
@@ -517,16 +518,14 @@
         },
         mounted() {
             this.$nextTick(function(){
-        		layui.use(['element', 'table', 'form', 'jquery', 'laydate'], function () {
-			        var element = layui.element;
-			        var table = layui.table;
-			        var form = layui.form;
-			        var $ = layui.jquery;
-			        var laydate = layui.laydate;
-	            })
+                layui.use(['element', 'table', 'form', 'jquery', 'laydate'], function () {
+                    var element = layui.element;
+                    var table = layui.table;
+                    var form = layui.form;
+                    var $ = layui.jquery;
+                    var laydate = layui.laydate;
+                })
             })
-            
-			
         },
         methods: {
             handleDrop(data) {
@@ -538,16 +537,20 @@
                     layui.use(['form','laydate'], function(){
                         layui.form.render()
                         layui.laydate.render({
-				            elem: '#laydata',
-				            type: "date"
-				        });
+                            elem: '#laydata',
+                            type: "date"
+                        });
                     });
                 });
             },
             //保存拖拽添加
             saveDrap() {
-               	this.msgBoxShow = false
-                var rules = this.$refs.rules ? this.$refs.rules[0].value : ''
+                if(!this.cur_drap.parm[0].value){ layer.msg('字段名称不能为空'); return;}
+                this.msgBoxShow = false
+                var rules
+                if(this.$refs.rules){
+                    rules = this.$refs.rules.length ? this.$refs.rules[0].value : ''
+                }
                 var required = this.$refs.required ? this.$refs.required[0].checked : ''
                 var required_data = this.$refs.required_data ? this.$refs.required_data[0].checked : ''
                 var dateTime = this.$refs.dateTime ? this.$refs.dateTime[0].value : ''
@@ -560,22 +563,33 @@
                 this.addBasicInfo()
             },
             addBasicInfo() {
-            	console.log(this.cur_drap)
-            	console.log(this.left_nav)
-            	var newAddObj = {}
-            	newAddObj = this.cur_drap
-            	this.cur_drap.parm.forEach((parm)=>{
-            		if(parm.name=='name'){ newAddObj.title = parm.value }
-            		if(parm.name=='required'){ newAddObj.required = parm.value }
-            		if(parm.name=='default'){ newAddObj.value = parm.value}
-            	})
-            	this.left_nav.forEach((item)=>{
-            		if(item.selected){
-            			item.attr.push(newAddObj)
-            		}
-            	})
-            	console.log(this.left_nav[0])
-            	console.log(this.cur_select)	
+                var newAddObj = {}
+                newAddObj = this.cur_drap
+                this.cur_drap.parm.forEach((parm)=>{
+                    if(parm.name=='name'){ newAddObj.title = parm.value }
+                    if(parm.name=='required'){ newAddObj.required = parm.value }
+                    if(parm.name=='default'){ newAddObj.value = parm.value}
+                    if(parm.name=='options'){ newAddObj.options = parm.options }
+                })
+                console.log(newAddObj)
+                if(newAddObj.options){
+                    newAddObj.options.forEach((op)=>{
+                        if(op.isSelect){
+                            newAddObj.value = op.name
+                        }
+                    })
+                }
+                this.left_nav.forEach((item)=>{
+                    if(item.selected){
+                        item.attr.push(newAddObj)
+                    }
+                })
+                this.$nextTick(function () {
+                    layui.use(['form'], function(){
+                        layui.form.render()
+                    });
+                });
+                console.log(this.cur_select)
             },
             selectNav(item) {
                 this.left_nav.forEach((i)=>{
@@ -590,7 +604,7 @@
                 console.log(item)
                 item.options.push({
                     isSelect: false,
-                    name: ''
+                    opName: ''
                 })
                 this.$nextTick(function () {
                     layui.use(['form'], function(){
@@ -599,10 +613,11 @@
                 });
             },
             checkOption(item,index) {
-              item.options.forEach((i)=>{
-                  i.isSelect = false
-                  item.options[index].isSelect = true
-              })
+                item.options.forEach((i)=>{
+                    i.isSelect = false
+                    item.options[index].isSelect = true
+                })
+
             },
             navEdit() {
                 console.log(123)
