@@ -35,38 +35,40 @@
                     <!--左边导航-->
                     <div class="layui-col-xs2 related">
                         <div class="left-nav-box bg-gary">
-                            <div class="left-nav-item" v-for="item in left_nav" :key="item.id" :class="item.selected?'active':''" v-on:click="selectNav(item)">
-                                {{ item.name }}
-                                <img src="images/edit.png" v-on:click.stop="navEdit">
-                            </div>
-                            <div class="left-nav-btn">
-                                <button class="layui-btn layui-btn-sm">添加资源类</button>
-                            </div>
+                        	<template>
+                        		<div class="left-nav-item" v-for="item in left_nav" :key="item.id" :class="item.selected?'active':''" v-on:click="selectNav(item)">
+	                                {{ item.name }}
+	                                <img src="images/edit.png" v-on:click.stop="navEdit">
+	                            </div>
+	                            <div class="left-nav-btn">
+	                                <button class="layui-btn layui-btn-sm">添加资源类</button>
+	                            </div>
+                        	</template>
                         </div>
                     </div>
                     <!--基本信息-->
                     <div class="layui-col-xs10">
-                        <div class="layui-row">
+                        <template class="layui-row">
                             <div class="layui-col-xs9">
                                 <div class="form-box">
                                     <div class="form-head">
                                         基本信息
                                     </div>
-                                    <div class="form-item-box">
-                                        <drop class="form-item"
+                                    <drop class="form-item-box" @drop="handleDrop">
+                                        <div class="form-item"
                                               v-for="item of cur_select.attr"
-                                              @drop="handleDrop">
+                                              >
                                             <div class="form-item-head">
-                                                {{ item.title }}：
+                                                {{ item.title }}<span class="red" v-if='item.required'>*</span>：
                                             </div>
                                             <div class="form-item-center">
-                                                <input type="text" name="title" autocomplete="off" :placeholder="'请输入' + item.title" class="layui-input"/>
+                                                <input v-if="item.type=='text'||item.type=='textarea'" v-model="item.value" type="text" name="title" autocomplete="off" :placeholder="'请输入' + item.title" class="layui-input"/>
                                             </div>
                                             <div class="form-item-right" v-if="item.hasRightText">
                                                 * 名称为固定选项，不可去除；
                                             </div>
-                                        </drop>
-                                    </div>
+                                        </div>
+                                    </drop>
                                 </div>
                             </div>
                             <div class="layui-col-xs3">
@@ -87,7 +89,7 @@
                                     </drag>
                                 </div>
                             </div>
-                        </div>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -114,24 +116,31 @@
                         <div class="msg-content-item" v-for="item of cur_drap.parm">
                             <div class="msg-content-item-title">
                                 <span class="red" v-if="item.required">*</span>{{ item.lable }}：
-                                <div v-if="item.type=='pulldown'&&item.name=='pulldown'" class="layui-btn layui-btn-sm" style="float: right" v-on:click="addOption(item)">添加</div>
+                                <div v-if="item.type=='options'" class="layui-btn layui-btn-sm" style="float: right" v-on:click="addOption(item)">添加</div>
                             </div>
                             <div class="msg-content-item-input" v-if="item.name=='required'">
                                 <input type="checkbox" name="close" v-model="item.value" ref="required" lay-skin="switch" lay-text="是|否">
                             </div>
+                            <div class="msg-content-item-input" v-if="item.name=='required_data'">
+                                <input type="checkbox" name="close" v-model="item.value" ref="required_data" lay-skin="switch" lay-text="是|否">
+                            </div>
+							<div class="msg-content-item-input" v-if="item.type=='dateTime'">
+                                 <input type="text" class="layui-input" id="laydata" v-model="item.value" ref='dateTime' placeholder="yyyy-MM-dd">
+                            </div>
                             <div class="msg-content-item-input" v-if="item.type=='text'||item.type=='number'">
                                 <input :type="item.type" :placeholder="'请输入' + item.lable" v-model="item.value" autocomplete="off" class="layui-input">
+                                <div v-if="item.name=='code'" class="msg-content-item-tips">请输入3-30个字母或数字，且首个字符必须为字母；</div>
                             </div>
-                            <div class="msg-content-item-input" v-else-if="item.type=='select'&&item.name=='rules'" >
+                            <div class="msg-content-item-input" v-else-if="item.type=='select'&&(item.name=='rules'||item.name=='useobj')" >
                                 <select name="rules" lay-verify="" v-model="item.value" ref="rules">
                                     <option value="111">无校验</option>
                                     <option value="010">IP地址</option>
                                     <option value="021">邮箱</option>
                                 </select>
                             </div>
-                            <div class="msg-content-item-input" v-else-if="item.type=='pulldown'&&item.name=='pulldown'" >
+                            <div class="msg-content-item-input" v-else-if="item.type=='options'&&(item.name=='options'||item.name=='table')" >
                                 <div v-for="(op,i) of item.options" :key="i" class="msg-content-item-pulldown">
-                                    <i :class="op.isSelect?'fa fa-check-circle':'fa fa-circle-thin'" class="pulldown-hover" aria-hidden="true" v-on:click="checkOption(item,i)"></i>
+                                    <i :class="op.isSelect?'fa fa-check-circle':'fa fa-circle-thin'" class="pulldown-hover" v-if="item.name=='options'" aria-hidden="true" v-on:click="checkOption(item,i)"></i>
                                     <input v-model="op.name" placeholder="请输入选项名称"/>
                                     <i class="fa fa-trash-o" v-on:click="item.options.splice(i,1)"></i>
                                 </div>
@@ -143,6 +152,7 @@
             </div>
         </div>
     </template>
+
 </div>
 <!--js逻辑-->
 <script src="lib/layui/layui.js"></script>
@@ -172,11 +182,15 @@
                     id: 0,
                     name: '机房',
                     selected: true,
+                    //属性 title.required,hasRightText,value
                     attr: [{
-                        title: '名称',
-                        required: true,
-                        hasRightText: true
+                        title: '名称',//显示title
+                        type: 'text',//类型
+                        required: true,//是否必填
+                        hasRightText: true,//显示（名称为固定选项，不可去除；）
+                        value:''//值
                     }],
+                    //类关系
                     class: {
 
                     }
@@ -328,7 +342,7 @@
                             }]
                     },{
                         title: "下拉",
-                        type: 'number',
+                        type: 'pulldown',
                         src: 'images/d-select.png',
                         parm: [
                             {
@@ -343,60 +357,157 @@
                                 value: false,
                                 type: 'check',
                             },{
-                                name: 'pulldown',
+                                name: 'options',
                                 lable: '选项',
                                 value: '',
-                                type: 'pulldown',
+                                type: 'options',
                                 options: []
                             }]
-
-
                     },{
                     title: "多选",
-                    type: 'number',
+                    type: 'checkbox',
                     src: 'images/d-checkgroup.png',
-                    name: '',
-                    default: '',
-                    required: false,
-                    rules: '',
-                    minLength: '',
-                    maxLength: '',
+                    parm: [
+                            {
+                                name: 'name',
+                                lable: '字段名称',
+                                value: '',
+                                type: 'text',
+                                required: true
+                            },{
+                                name: 'required',
+                                lable: '是否必填',
+                                value: false,
+                                type: 'check',
+                            },{
+                                name: 'options',
+                                lable: '选项',
+                                value: '',
+                                type: 'options',
+                                options: []
+                            }]
                 },{
                     title: "单选",
-                    type: 'number',
+                    type: 'radio',
                     src: 'images/d-check.png',
-                    name: '',
-                    default: '',
-                    required: false,
-                    rules: '',
-                    minLength: '',
-                    maxLength: '',
+                    parm: [
+                            {
+                                name: 'name',
+                                lable: '字段名称',
+                                value: '',
+                                type: 'text',
+                                required: true
+                            },{
+                                name: 'required',
+                                lable: '是否必填',
+                                value: false,
+                                type: 'check',
+                            },{
+                                name: 'options',
+                                lable: '选项',
+                                value: '',
+                                type: 'options',
+                                options: []
+                            }]
                 },{
                     title: "日期和时间",
-                    type: 'number',
+                    type: 'dateTime',
                     src: 'images/d-date.png',
-                    name: '',
-                    default: '',
-                    required: false,
-                    rules: '',
-                    minLength: '',
-                    maxLength: '',
+                    parm: [
+                            {
+                                name: 'name',
+                                lable: '字段名称',
+                                value: '',
+                                type: 'text',
+                                required: true
+                            },{
+                                name: 'required',
+                                lable: '是否必填',
+                                value: false,
+                                type: 'check',
+                            },{
+                                name: 'required_data',
+                                lable: '仅日期',
+                                value: false,
+                                type: 'check',
+                            },{
+                                name: 'dateTime',
+                                lable: '默认值',
+                                value: '',
+                                type: 'dateTime',
+                            }]
                 },{
                     title: "属性分组",
                     type: 'number',
                     src: 'images/d-group.png'
                 },{
                     title: "表格",
-                    type: 'number',
-                    src: 'images/d-table.png'
+                    type: 'table',
+                    src: 'images/d-table.png',
+                    parm: [
+                            {
+                                name: 'name',
+                                lable: '字段名称',
+                                value: '',
+                                type: 'text',
+                                required: true
+                            },{
+                                name: 'required',
+                                lable: '是否必填',
+                                value: false,
+                                type: 'check',
+                            },{
+                                name: 'table',
+                                lable: '列名',
+                                value: false,
+                                type: 'options',
+                                options: []
+                            }]
                 },{
                     title: "引用",
-                    type: 'number',
-                    src: 'images/d-quote.png'
+                    type: 'useobj',
+                    src: 'images/d-quote.png',
+                    parm: [
+                            {
+                                name: 'name',
+                                lable: '字段名称',
+                                value: '',
+                                type: 'text',
+                                required: true
+                            },{
+                                name: 'required',
+                                lable: '是否必填',
+                                value: false,
+                                type: 'check',
+                            },{
+                                name: 'useobj',
+                                lable: '引用对象',
+                                value: '',
+                                type: 'select',
+                            }]
                 },{
                     title: "附件",
-                    type: 'number',
-                    src: 'images/d-file.png'
+                    type: 'file',
+                    src: 'images/d-file.png',
+                    parm: [
+                            {
+                                name: 'name',
+                                lable: '字段名称',
+                                value: '',
+                                type: 'text',
+                                required: true
+                            },{
+                                name: 'code',
+                                lable: '字段编码',
+                                value: '',
+                                type: 'text',
+                                required: true
+                            },{
+                                name: 'required',
+                                lable: '是否必填',
+                                value: false,
+                                type: 'check',
+                            }]
                 }],
                 form:{}
             }
@@ -405,8 +516,17 @@
             this.selectNav(this.left_nav[0])
         },
         mounted() {
-            var that = this
-
+            this.$nextTick(function(){
+        		layui.use(['element', 'table', 'form', 'jquery', 'laydate'], function () {
+			        var element = layui.element;
+			        var table = layui.table;
+			        var form = layui.form;
+			        var $ = layui.jquery;
+			        var laydate = layui.laydate;
+	            })
+            })
+            
+			
         },
         methods: {
             handleDrop(data) {
@@ -415,20 +535,47 @@
                 this.cur_drap = JSON.parse(JSON.stringify(data))
                 this.msgBoxShow = true
                 this.$nextTick(function () {
-                    layui.use(['form'], function(){
+                    layui.use(['form','laydate'], function(){
                         layui.form.render()
+                        layui.laydate.render({
+				            elem: '#laydata',
+				            type: "date"
+				        });
                     });
                 });
             },
+            //保存拖拽添加
             saveDrap() {
-                // this.msgBoxShow = false
+               	this.msgBoxShow = false
                 var rules = this.$refs.rules ? this.$refs.rules[0].value : ''
                 var required = this.$refs.required ? this.$refs.required[0].checked : ''
+                var required_data = this.$refs.required_data ? this.$refs.required_data[0].checked : ''
+                var dateTime = this.$refs.dateTime ? this.$refs.dateTime[0].value : ''
                 this.cur_drap.parm.forEach((item)=>{
                     if(rules && item.name=='rules'){ item.value = rules }
-                    if(required && item.name=='required'){ item.value = required }
+                    if(item.name=='required'){ item.value = required }
+                    if(item.name=='required_data'){ item.value = required_data }
+                    if(item.name=='dateTime'){ item.value = dateTime }
                 })
-                console.log(this.cur_drap.parm)
+                this.addBasicInfo()
+            },
+            addBasicInfo() {
+            	console.log(this.cur_drap)
+            	console.log(this.left_nav)
+            	var newAddObj = {}
+            	newAddObj = this.cur_drap
+            	this.cur_drap.parm.forEach((parm)=>{
+            		if(parm.name=='name'){ newAddObj.title = parm.value }
+            		if(parm.name=='required'){ newAddObj.required = parm.value }
+            		if(parm.name=='default'){ newAddObj.value = parm.value}
+            	})
+            	this.left_nav.forEach((item)=>{
+            		if(item.selected){
+            			item.attr.push(newAddObj)
+            		}
+            	})
+            	console.log(this.left_nav[0])
+            	console.log(this.cur_select)	
             },
             selectNav(item) {
                 this.left_nav.forEach((i)=>{
@@ -463,6 +610,6 @@
         }
     })
 </script>
-
+<script src="lib/layui/layui.js"></script>
 </body>
 </html>
