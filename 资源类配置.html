@@ -55,25 +55,46 @@
                                         基本信息
                                     </div>
                                     <drop class="form-item-box" @drop="handleDrop">
-                                        <div class="form-item"
-                                             v-for="item of cur_select.attr"
-                                        >
-                                            <div class="form-item-head">
-                                                {{ item.title }} <span class="red" v-if='item.required'>*</span>：
-                                            </div>
-                                            <div class="form-item-center">
-                                                <form class="layui-form">
-                                                    <input v-if="item.type=='text'||item.type=='number'" v-model="item.value" :type="item.type" name="title" autocomplete="off" :placeholder="'请输入' + item.title" class="layui-input"/>
-                                                    <textarea v-if="item.type=='textarea'" v-model="item.value" autocomplete="off" :placeholder="'请输入' + item.title" class="layui-textarea"></textarea>
-                                                    <select v-if="item.type=='pulldown'" v-model="item.value">
+                                        <form class="layui-form" action="">
+                                            <div class="form-item"
+                                                 v-for="item of cur_select.attr"
+                                            >
+                                                <div class="form-item-head">
+                                                    {{ item.title }} <span class="red" v-if='item.required'>*</span>：
+                                                </div>
+                                                <div class="form-item-center">
+                                                    <input v-if="item.type=='text'||item.type=='number'" :lay-verify="layVerify(item)" :data-item="JSON.stringify(item)"
+                                                           v-model="item.value" :type="item.type" name="title" autocomplete="off" :placeholder="'请输入' + item.title" class="layui-input"/>
+                                                    <textarea v-if="item.type=='textarea'" :lay-verify="layVerify(item)" :data-item="JSON.stringify(item)"
+                                                              v-model="item.value" autocomplete="off" :placeholder="'请输入' + item.title" class="layui-textarea"></textarea>
+                                                    <select v-if="item.type=='pulldown'" v-model="item.value" :lay-verify="layVerify(item)">
+                                                        <option value="">请选择</option>
                                                         <option v-for="op of item.options" :value="op.opName">{{op.opName}}</option>
                                                     </select>
-                                                </form>
+                                                    <select v-if="item.type=='useobj'" v-model="item.value" :lay-verify="layVerify(item)">
+                                                        <option value="">请选择</option>
+                                                        <option v-for="op of item.options" :value="op.opName">{{op.opName}}</option>
+                                                    </select>
+                                                    <input type="text" class="layui-input" v-if="item.type=='dateTime'" :id="'laydate'+item.title" placeholder="yyyy-MM-dd">
+                                                    <div v-if="item.type=='checkbox'">
+                                                        <input type="checkbox" v-for="op of item.options" :title="op.opName" :checked="op.isSelect">
+                                                    </div>
+                                                    <div v-if="item.type=='radio'">
+                                                        <input type="radio" :name="item.title" v-for="op of item.options" :title="op.opName" :value="op.opName" :checked="op.isSelect">
+                                                    </div>
+                                                    <table v-if="item.type=='table'" class="layui-hide" :id="'laytable'+item.title"></table>
+                                                    <input v-if="item.type=='file'" :lay-verify="layVerify(item)" class="input-file" type="file" v-on:change="(e)=>{changeFile(e,item)}" />
+                                                </div>
+                                                <div class="form-item-right" v-if="item.hasRightText||item.unit">
+                                                    <div v-if="item.hasRightText">* 名称为固定选项，不可去除；</div>
+                                                    <div v-if="item.unit">单位：{{item.unit}}</div>
+                                                </div>
                                             </div>
-                                            <div class="form-item-right" v-if="item.hasRightText">
-                                                * 名称为固定选项，不可去除；
+                                            <div class="form-item">
+                                                <div class="form-item-head"> </div>
+                                                <button class="layui-btn " lay-submit lay-filter="*">提交</button>
                                             </div>
-                                        </div>
+                                        </form>
                                     </drop>
                                 </div>
                             </div>
@@ -133,7 +154,7 @@
                                     <div v-if="item.name=='code'" class="msg-content-item-tips">请输入3-30个字母或数字，且首个字符必须为字母；</div>
                                 </template>
                                 <select name="rules" v-if="item.type=='select'&&(item.name=='rules'||item.name=='useobj')" v-model="item.value" ref="rules">
-                                    <option value="">无校验1</option>
+                                    <option value="">请选择</option>
                                     <option value="111">无校验</option>
                                     <option value="010">IP地址</option>
                                     <option value="021">邮箱</option>
@@ -168,9 +189,8 @@
     window.onload = function () {
         NProgress.done();
     }
-
-
 </script>
+<script src="lib/layui/layui.js"></script>
 <!-- vueJs -->
 <script>
     new Vue({
@@ -198,11 +218,33 @@
                 },{
                     id: 1,
                     name: '机柜',
-                    selected: false
+                    selected: false,
+                    attr: [{
+                        title: '名称',//显示title
+                        type: 'text',//类型
+                        required: true,//是否必填
+                        hasRightText: true,//显示（名称为固定选项，不可去除；）
+                        value:'',//值
+                    }],
+                    //类关系
+                    class: {
+
+                    }
                 },{
                     id: 2,
                     name: 'PC服务器',
-                    selected: false
+                    selected: false,
+                    attr: [{
+                        title: '名称',//显示title
+                        type: 'text',//类型
+                        required: true,//是否必填
+                        hasRightText: true,//显示（名称为固定选项，不可去除；）
+                        value:'',//值
+                    }],
+                    //类关系
+                    class: {
+
+                    }
                 },],
                 cur_select: {},
                 cur_drap: {},
@@ -510,50 +552,138 @@
                                 type: 'check',
                             }]
                     }],
-                form:{}
+                LayUI:{}
             }
         },
         created() {
             this.selectNav(this.left_nav[0])
         },
         mounted() {
-            this.$nextTick(function(){
-                layui.use(['element', 'table', 'form', 'jquery', 'laydate'], function () {
-                    var element = layui.element;
-                    var table = layui.table;
-                    var form = layui.form;
-                    var $ = layui.jquery;
-                    var laydate = layui.laydate;
-                })
-            })
+            this.initLayUI()
         },
         methods: {
+            layVerify(item){
+                // console.log('**********************')
+                // console.log(item)
+                var verify = ''
+                if(item.maxLength||item.minLength){
+                    verify+='|length'
+                }
+                if (item.required){
+                    verify+='|required'
+                }
+               return verify
+            },
+            // 初始化layui
+            initLayUI(){
+                var that = this
+                this.$nextTick(function(){
+                    layui.use(['element', 'table', 'form', 'jquery', 'laydate'], function () {
+                        that.LayUI = {
+                            element: layui.element,
+                            table: layui.table,
+                            form: layui.form,
+                            $: layui.$,
+                            laydate: layui.laydate,
+                        }
+                        that.LayUI.form.render()
+                        that.LayUI.laydate.render({
+                            elem: '#laydata',
+                            type: "date"
+                        })
+                        that.LayUI.form.verify({
+                            username: function(value, item){ //value：表单的值、item：表单的DOM对象
+                                if(!new RegExp("^[a-zA-Z0-9_\u4e00-\u9fa5\\s·]+$").test(value)){
+                                    return '用户名不能有特殊字符';
+                                }
+                                if(/^\d+\d+\d$/.test(value)){
+                                    return '用户名不能全为数字';
+                                }
+                            },
+                            length: function(value,el){
+                                var item = JSON.parse(el.getAttribute('data-item'))
+                                if(value.length < item.minLength){
+                                    return item.title+'字段至少'+item.minLength+'个字符';
+                                }
+                                if(item.maxLength>0){
+                                    if(value.length > item.maxLength){
+                                        return item.title+'字段至多'+item.maxLength+'个字符';
+                                    }
+                                }
+                            }
+                            ,pass: [
+                                /^[\S]{6,12}$/
+                                ,'密码必须6到12位，且不能出现空格'
+                            ]
+                        });
+                        //监听提交
+                        layui.form.on('submit(*)', function(data){
+                            console.log(data.elem) //被执行事件的元素DOM对象，一般为button对象
+                            console.log(data.form) //被执行提交的form对象，一般在存在form标签时才会返回
+                            console.log(data.field) //当前容器的全部表单字段，名值对形式：{name: value}
+                            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+                        });
+                    })
+                })
+            },
+            //拖拽回调
             handleDrop(data) {
+                var that = this
                 console.log(data)
                 if(!data){ return }
                 this.cur_drap = JSON.parse(JSON.stringify(data))
                 this.msgBoxShow = true
                 this.$nextTick(function () {
-                    layui.use(['form','laydate'], function(){
-                        layui.form.render()
-                        layui.laydate.render({
-                            elem: '#laydata',
-                            type: "date"
-                        });
-                    });
-                });
+                    that.LayUI.form.render()
+                    that.LayUI.laydate.render({
+                        elem: '#laydata',
+                        type: "date",
+                        done: function(value, date, endDate){
+                            that.cur_drap.parm.forEach((parm)=>{
+                                if(parm.type=='dateTime'){
+                                    parm.value = value
+                                }
+                            })
+                        }
+                    })
+                })
             },
             //保存拖拽添加
             saveDrap() {
+                var maxLength,minLength,code,hasCode;
                 if(!this.cur_drap.parm[0].value){ layer.msg('字段名称不能为空'); return;}
+                this.cur_drap.parm.forEach((parm)=>{
+                    if(parm.name == 'maxLength'){ maxLength = parm.value }
+                    if(parm.name == 'minLength'){ minLength = parm.value }
+                    if(parm.name == 'code'){  code = parm.value;hasCode = true }
+                })
+                if(maxLength){if(maxLength<minLength){ layer.msg('最大文本长度不能小于最小文本长度'); return; }}
+                if(!code&&hasCode){layer.msg('字段编码不能为空'); return; }
+                console.log(code)
+                if(code){
+                    var reg= /^[A-Za-z]/;
+                    if (!reg.test(code)){
+                        layer.msg('字段编码首字符必须为字母'); return;
+                    }
+                    if (code.length<3||code>30){
+                        layer.msg('字段编码需输入3-30个字母或数字'); return;
+                    }
+                }
+                if(maxLength<0){ layer.msg('最大文本长度不能小于0'); return; }
+                if(minLength<0){ layer.msg('最小文本长度不能小于0'); return; }
                 this.msgBoxShow = false
-                var rules
+                var rules,required_data,dateTime
                 if(this.$refs.rules){
                     rules = this.$refs.rules.length ? this.$refs.rules[0].value : ''
                 }
                 var required = this.$refs.required ? this.$refs.required[0].checked : ''
-                var required_data = this.$refs.required_data ? this.$refs.required_data[0].checked : ''
-                var dateTime = this.$refs.dateTime ? this.$refs.dateTime[0].value : ''
+                if(this.$refs.required_data){
+                    console.log(this.$refs.required_data)
+                    required_data = this.$refs.required_data.length ? this.$refs.required_data[0].checked : ''
+                }
+                if(this.$refs.dateTime){
+                    dateTime = this.$refs.dateTime.length ? this.$refs.dateTime[0].value : ''
+                }
                 this.cur_drap.parm.forEach((item)=>{
                     if(rules && item.name=='rules'){ item.value = rules }
                     if(item.name=='required'){ item.value = required }
@@ -562,35 +692,67 @@
                 })
                 this.addBasicInfo()
             },
+            //添加基础信息
             addBasicInfo() {
-                var newAddObj = {}
-                newAddObj = this.cur_drap
+                var that = this,
+                    newAddObj = {},
+                    newAddObj = this.cur_drap
+                    newAddObj.value = ''
                 this.cur_drap.parm.forEach((parm)=>{
                     if(parm.name=='name'){ newAddObj.title = parm.value }
                     if(parm.name=='required'){ newAddObj.required = parm.value }
                     if(parm.name=='default'){ newAddObj.value = parm.value}
                     if(parm.name=='options'){ newAddObj.options = parm.options }
+                    if(parm.name=='unit'){ newAddObj.unit = parm.value }
+                    if(parm.name=='maxLength'){ newAddObj.maxLength = parm.value }
+                    if(parm.name=='minLength'){ newAddObj.minLength = parm.value }
+                    if(parm.name=='dateTime'){ newAddObj.value = parm.value }
+                    if(parm.name=='table'){ newAddObj.options = parm.options }
                 })
-                console.log(newAddObj)
                 if(newAddObj.options){
                     newAddObj.options.forEach((op)=>{
                         if(op.isSelect){
-                            newAddObj.value = op.name
+                            newAddObj.value = op.opName
                         }
                     })
                 }
+                console.log(newAddObj)
                 this.left_nav.forEach((item)=>{
                     if(item.selected){
                         item.attr.push(newAddObj)
                     }
                 })
                 this.$nextTick(function () {
-                    layui.use(['form'], function(){
-                        layui.form.render()
+                    that.LayUI.form.render()
+                    that.LayUI.laydate.render({
+                        elem: document.getElementById('laydate' + newAddObj.title),
+                        type: 'date',
+                        value: newAddObj.value
+                    })
+                    var table = []
+                    if(newAddObj.options){//table添加
+                        if(newAddObj.options.length&&newAddObj.type=='table'){
+                            newAddObj.options.forEach((op)=>{
+                                table.push({
+                                    field: op.opName, title: op.opName
+                                })
+                            })
+                            table.push({
+                                field:'edit',title:'操作'
+                            })
+                        }
+                    }
+                    that.LayUI.table.render({
+                        elem: document.getElementById('laytable' + newAddObj.title),
+                        cols: [table],
+                        data: [{
+                            'edit': '<div class="layui-btn" style="height: 28px;line-height: 28px;">编辑</div><div class="layui-btn layui-btn-danger" style="height: 28px;line-height: 28px;">删除</div>'
+                        }]
                     });
                 });
                 console.log(this.cur_select)
             },
+            //选择左边导航
             selectNav(item) {
                 this.left_nav.forEach((i)=>{
                     i.selected = false
@@ -600,6 +762,7 @@
                     }
                 })
             },
+            //添加options
             addOption(item){
                 console.log(item)
                 item.options.push({
@@ -612,6 +775,12 @@
                     });
                 });
             },
+            changeFile(e,item){
+                console.log(e)
+                console.log(item)
+                item.value = e
+            },
+            //选择options默认值
             checkOption(item,index) {
                 item.options.forEach((i)=>{
                     i.isSelect = false
@@ -625,6 +794,5 @@
         }
     })
 </script>
-<script src="lib/layui/layui.js"></script>
 </body>
 </html>

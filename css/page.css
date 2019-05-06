@@ -70,6 +70,7 @@
 }
 .form-item-center{
     flex: 1;
+    max-width: 87%;
 }
 .form-item-right{
     width: 22%;
@@ -168,4 +169,8 @@
     padding: 15px 10px;
     z-index: 2;
     width: 100px;
+}
+.input-file{
+    border: 1px solid rgba(0,0,0,.1);
+    padding: 5px;
 }
