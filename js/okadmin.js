@@ -19,7 +19,7 @@ layui.use(['element', 'layer'], function () {
             $(".layui-layout-admin .layui-header .layui-logo").animate({left: "-200px"});
             $(".layui-layout-admin .layui-header .menu-switch").animate({left: "0px"});
             $(".layui-layout-admin .layui-header .layui-layout-left").animate({left: "35px"});
-            $(".layui-layout-admin .layui-header .menu-switch .icon-caidan").css('transform','rotate(90deg)');
+            $(".layui-layout-admin .layui-header .menu-switch .fa-bars").css('transform','rotate(90deg)');
         } else {
             $(".layui-layout-admin .layui-side").animate({left: "0px"});
             $(".layui-layout-admin .content-body").animate({left: "200px"});
@@ -27,7 +27,7 @@ layui.use(['element', 'layer'], function () {
             $(".layui-layout-admin .layui-header .layui-logo").animate({left: "0px"});
             $(".layui-layout-admin .layui-header .menu-switch").animate({left: "200px"});
             $(".layui-layout-admin .layui-header .layui-layout-left").animate({left: "235px"});
-            $(".layui-layout-admin .layui-header .menu-switch .icon-caidan").css('transform','rotate(0deg)');
+            $(".layui-layout-admin .layui-header .menu-switch .fa-bars").css('transform','rotate(0deg)');
         }
     });
 

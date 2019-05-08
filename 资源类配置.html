@@ -27,98 +27,117 @@
         <div class="layui-tab-content">
             <!--基础设施层start-->
             <div class="layui-tab-item layui-show">
-                <div class="head-title-box">
-                    <button class="layui-btn ">添加属性</button>
-                    <button class="layui-btn layui-btn-primary">添加类关系</button>
-                </div>
-                <div class="layui-row">
-                    <!--左边导航-->
-                    <div class="layui-col-xs2 related">
-                        <div class="left-nav-box bg-gary">
-                            <template>
-                                <div class="left-nav-item" v-for="item in left_nav" :key="item.id" :class="item.selected?'active':''" v-on:click="selectNav(item)">
-                                    {{ item.name }}
-                                    <img src="images/edit.png" v-on:click.stop="navEdit">
+                <!-- 添加属性-->
+                    <div class="head-title-box">
+                        <button class="layui-btn" :class="{'layui-btn-primary':isClassModel}"  v-on:click="isClassModel=false">添加属性</button>
+                        <button class="layui-btn" :class="{'layui-btn-primary':!isClassModel}" v-on:click="isClassModel=true">添加类关系</button>
+                    </div>
+                    <div class="layui-row">
+                        <!--左边导航-->
+                        <div class="layui-col-xs2 related">
+                            <div class="left-nav-box bg-gary">
+                                <template>
+                                    <div class="left-nav-item" v-for="item in left_nav" :key="item.id" :class="item.selected?'active':''" v-on:click="selectNav(item)">
+                                        {{ item.name }}
+                                        <img src="images/edit.png" v-on:click.stop="addResClass(item)">
+                                    </div>
+                                    <div class="left-nav-btn">
+                                        <button class="layui-btn layui-btn-sm" v-on:click="addResClass">添加资源类</button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                        <!--添加属性-基本信息-->
+                        <div class="layui-col-xs10" v-show="!isClassModel">
+                            <template class="layui-row">
+                                <div class="layui-col-xs9">
+                                    <!-- 添加属性-->
+                                    <div class="form-box" >
+                                            <div class="form-head">
+                                                基本信息
+                                            </div>
+                                            <drop class="form-item-box" @drop="handleDrop">
+                                                <form class="layui-form" action="">
+                                                    <div class="form-item"
+                                                         v-for="item of cur_select.attr"
+                                                    >
+                                                        <div class="form-item-head">
+                                                            {{ item.title }} <span class="red" v-if='item.required'>*</span>：
+                                                        </div>
+                                                        <div class="form-item-center">
+                                                            <input v-if="item.type=='text'||item.type=='number'" :lay-verify="layVerify(item)" :data-item="JSON.stringify(item)"
+                                                                   v-model="item.value" :type="item.type" name="title" autocomplete="off" :placeholder="'请输入' + item.title" class="layui-input"/>
+                                                            <textarea v-if="item.type=='textarea'" :lay-verify="layVerify(item)" :data-item="JSON.stringify(item)"
+                                                                      v-model="item.value" autocomplete="off" :placeholder="'请输入' + item.title" class="layui-textarea"></textarea>
+                                                            <select v-if="item.type=='pulldown'" v-model="item.value" :lay-verify="layVerify(item)">
+                                                                <option value="">请选择</option>
+                                                                <option v-for="op of item.options" :value="op.opName">{{op.opName}}</option>
+                                                            </select>
+                                                            <select v-if="item.type=='useobj'" v-model="item.value" :lay-verify="layVerify(item)">
+                                                                <option value="">请选择</option>
+                                                                <option v-for="op of item.options" :value="op.opName">{{op.opName}}</option>
+                                                            </select>
+                                                            <input type="text" class="layui-input" v-if="item.type=='dateTime'" :id="'laydate'+item.title" placeholder="yyyy-MM-dd">
+                                                            <div v-if="item.type=='checkbox'">
+                                                                <input type="checkbox" v-for="op of item.options" :title="op.opName" :checked="op.isSelect">
+                                                            </div>
+                                                            <div v-if="item.type=='radio'">
+                                                                <input type="radio" :name="item.title" v-for="op of item.options" :title="op.opName" :value="op.opName" :checked="op.isSelect">
+                                                            </div>
+                                                            <table v-if="item.type=='table'" class="layui-hide" :id="'laytable'+item.title"></table>
+                                                            <input v-if="item.type=='file'" :lay-verify="layVerify(item)" class="input-file" type="file" v-on:change="(e)=>{changeFile(e,item)}" />
+                                                        </div>
+                                                        <div class="form-item-right" v-if="item.hasRightText||item.unit">
+                                                            <div v-if="item.hasRightText">* 名称为固定选项，不可去除；</div>
+                                                            <div v-if="item.unit">单位：{{item.unit}}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-item">
+                                                        <div class="form-item-head"> </div>
+                                                        <button class="layui-btn " lay-submit lay-filter="*">提交</button>
+                                                    </div>
+                                                </form>
+                                            </drop>
+                                        </div>
+
                                 </div>
-                                <div class="left-nav-btn">
-                                    <button class="layui-btn layui-btn-sm">添加资源类</button>
+                                <div class="layui-col-xs3">
+                                    <div class="drap-box">
+                                        <drag class="drap-item"
+                                              v-for="item of drap_icon"
+                                              :key="item.title"
+                                              :transfer-data="item"
+                                              :effect-allowed="['copy']"
+                                              drop-effect="copy"
+                                        >
+                                    <span>
+                                        <img :src="item.src">
+                                    </span>
+                                            <span style="margin-top: 5px">
+                                        {{ item.title }}
+                                    </span>
+                                        </drag>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <!--添加类关系-->
+                        <div v-show="isClassModel" class="layui-col-xs10 class-model-box">
+                            <template>
+                                <div class="class-model-item-box">
+                                    <div v-for="item of cur_select.class[0].children" class="class-model-item">
+                                        <img :src="'images/'+item.type+'.png'">
+                                        <span style="position: absolute;top: 150%;">123</span>
+                                    </div>
+                                </div>
+                                <div v-for="item of cur_select.class" style="width: 100%;text-align: center;margin-top: 100px">
+                                    <div class="servers-img">
+                                        <img :src="'images/'+item.type+'.png'" >
+                                    </div>
                                 </div>
                             </template>
                         </div>
                     </div>
-                    <!--基本信息-->
-                    <div class="layui-col-xs10">
-                        <template class="layui-row">
-                            <div class="layui-col-xs9">
-                                <div class="form-box">
-                                    <div class="form-head">
-                                        基本信息
-                                    </div>
-                                    <drop class="form-item-box" @drop="handleDrop">
-                                        <form class="layui-form" action="">
-                                            <div class="form-item"
-                                                 v-for="item of cur_select.attr"
-                                            >
-                                                <div class="form-item-head">
-                                                    {{ item.title }} <span class="red" v-if='item.required'>*</span>：
-                                                </div>
-                                                <div class="form-item-center">
-                                                    <input v-if="item.type=='text'||item.type=='number'" :lay-verify="layVerify(item)" :data-item="JSON.stringify(item)"
-                                                           v-model="item.value" :type="item.type" name="title" autocomplete="off" :placeholder="'请输入' + item.title" class="layui-input"/>
-                                                    <textarea v-if="item.type=='textarea'" :lay-verify="layVerify(item)" :data-item="JSON.stringify(item)"
-                                                              v-model="item.value" autocomplete="off" :placeholder="'请输入' + item.title" class="layui-textarea"></textarea>
-                                                    <select v-if="item.type=='pulldown'" v-model="item.value" :lay-verify="layVerify(item)">
-                                                        <option value="">请选择</option>
-                                                        <option v-for="op of item.options" :value="op.opName">{{op.opName}}</option>
-                                                    </select>
-                                                    <select v-if="item.type=='useobj'" v-model="item.value" :lay-verify="layVerify(item)">
-                                                        <option value="">请选择</option>
-                                                        <option v-for="op of item.options" :value="op.opName">{{op.opName}}</option>
-                                                    </select>
-                                                    <input type="text" class="layui-input" v-if="item.type=='dateTime'" :id="'laydate'+item.title" placeholder="yyyy-MM-dd">
-                                                    <div v-if="item.type=='checkbox'">
-                                                        <input type="checkbox" v-for="op of item.options" :title="op.opName" :checked="op.isSelect">
-                                                    </div>
-                                                    <div v-if="item.type=='radio'">
-                                                        <input type="radio" :name="item.title" v-for="op of item.options" :title="op.opName" :value="op.opName" :checked="op.isSelect">
-                                                    </div>
-                                                    <table v-if="item.type=='table'" class="layui-hide" :id="'laytable'+item.title"></table>
-                                                    <input v-if="item.type=='file'" :lay-verify="layVerify(item)" class="input-file" type="file" v-on:change="(e)=>{changeFile(e,item)}" />
-                                                </div>
-                                                <div class="form-item-right" v-if="item.hasRightText||item.unit">
-                                                    <div v-if="item.hasRightText">* 名称为固定选项，不可去除；</div>
-                                                    <div v-if="item.unit">单位：{{item.unit}}</div>
-                                                </div>
-                                            </div>
-                                            <div class="form-item">
-                                                <div class="form-item-head"> </div>
-                                                <button class="layui-btn " lay-submit lay-filter="*">提交</button>
-                                            </div>
-                                        </form>
-                                    </drop>
-                                </div>
-                            </div>
-                            <div class="layui-col-xs3">
-                                <div class="drap-box">
-                                    <drag class="drap-item"
-                                          v-for="item of drap_icon"
-                                          :key="item.title"
-                                          :transfer-data="item"
-                                          :effect-allowed="['copy']"
-                                          drop-effect="copy"
-                                    >
-                                    <span>
-                                        <img :src="item.src">
-                                    </span>
-                                        <span style="margin-top: 5px">
-                                        {{ item.title }}
-                                    </span>
-                                    </drag>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
             </div>
             <!--基础设施层end-->
             <div class="layui-tab-item">虚拟资源层</div>
@@ -127,8 +146,6 @@
             <div class="layui-tab-item">管理资源层</div>
         </div>
     </div>
-
-
     <!--拖拽弹窗-->
     <template v-if="msgBoxShow">
         <div class="msg-box" >
@@ -174,6 +191,54 @@
             </div>
         </div>
     </template>
+<!--上传图片-->
+    <template v-if="showUpload">
+        <div class="msg-box" >
+            <div class="msg-box-bg"></div>
+            <div class="msg-content-box">
+                <div class="msg-content-title">
+                    {{isEdit?'编辑':'添加'}}资源类
+                    <i class="layui-icon layui-icon-close" v-on:click="showUpload=false;uploadImgOption.img='';uploadImgOption.curimg='';uploadImgOption.textValue='';isEdit=false"
+                       style="float: right;cursor: pointer"></i>
+                </div>
+                <div class="msg-content">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="white-space: nowrap;">资源类名称<span class="red">*</span></label>
+                            <div class="layui-input-block">
+                                <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入标题" class="layui-input" v-model="uploadImgOption.textValue">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">类图标:</label>
+                            <div class="layui-input-block">
+                                <button type="button" class="layui-btn" id="uploadImg">
+                                   <i class="layui-icon">&#xe67c;</i>上传图片
+                                </button>
+                                <span style="color: #b8b8b8;">图标大小为100*100px, 格式为.png</span>
+                            </div>
+                        </div>
+                        <div class="layui-form-item" v-if="uploadImgOption.curimg">
+                            <label class="layui-form-label" style="color: #b8b8b8">(当前图标)</label>
+                            <img :src="uploadImgOption.curimg"/>
+                        </div>
+                    <vue-cropper style="height: 400px"
+                                 ref="cropper"
+                                 v-show="uploadImgOption.img"
+                                 :img="uploadImgOption.img"
+                                 :auto-crop="uploadImgOption.autoCrop"
+                                 :auto-crop-width="uploadImgOption.autoCropWidth"
+                                 :auto-crop-height="uploadImgOption.autoCropHeight"
+                                 :output-size="uploadImgOption.outputSize"
+                                 :output-type="uploadImgOption.outputType"
+                                 :center-box="uploadImgOption.centerBox"
+                                 :fixed="uploadImgOption.fixed"
+                    ></vue-cropper>
+                    <button class="layui-btn" style="margin-top: 20px" v-on:click="saveCropper" v-if="uploadImgOption.img">截取图片</button>
+                    <button class="layui-btn" style="margin-top: 20px" :disabled="uploadImgOption.img?true:false" :class="uploadImgOption.img?'layui-bg-gray':''" v-on:click="saveImage">保存</button>
+                </div>
+            </div>
+        </div>
+    </template>
 
 </div>
 <!--js逻辑-->
@@ -181,18 +246,12 @@
 <script src="js/vue.min.js"></script>
 <script src="lib/nprogress/nprogress.js"></script>
 <!--拖拽-->
-<script src="js/sortable.js"></script>
-<script src="js/vuedraggable.js"></script>
 <script src="js/vue-drag-drop.browser.js"></script>
+<!--上传截图-->
+<script src="component/vue-cropper.js"></script>
 <script>
     NProgress.start();
-    window.onload = function () {
-        NProgress.done();
-    }
-</script>
-<script src="lib/layui/layui.js"></script>
-<!-- vueJs -->
-<script>
+    Vue.use(window['vue-cropper'])
     new Vue({
         el: '#vue-element',
         data() {
@@ -212,9 +271,23 @@
                         value:'',//值
                     }],
                     //类关系
-                    class: {
-
-                    }
+                    class: [{
+                        name:'服务器',
+                        type:'server',
+                        children:[{
+                            name:'网络设备',
+                            type:'network'
+                        },{
+                            name:'windows',
+                            type:'windows'
+                        },{
+                            name:'虚拟机',
+                            type:'virtual'
+                        },{
+                            name:'数据库',
+                            type:'database'
+                        }]
+                    }]
                 },{
                     id: 1,
                     name: '机柜',
@@ -223,7 +296,7 @@
                         title: '名称',//显示title
                         type: 'text',//类型
                         required: true,//是否必填
-                        hasRightText: true,//显示（名称为固定选项，不可去除；）
+                        hasRightText: true,
                         value:'',//值
                     }],
                     //类关系
@@ -238,7 +311,7 @@
                         title: '名称',//显示title
                         type: 'text',//类型
                         required: true,//是否必填
-                        hasRightText: true,//显示（名称为固定选项，不可去除；）
+                        hasRightText: true,
                         value:'',//值
                     }],
                     //类关系
@@ -552,7 +625,22 @@
                                 type: 'check',
                             }]
                     }],
-                LayUI:{}
+                LayUI:{},
+                uploadImgOption:{
+                    img:'',
+                    curimg:'',
+                    outputSize:0.8,
+                    outputType:'png',
+                    autoCrop:true,
+                    autoCropWidth:'100',
+                    autoCropHeight:'100',
+                    centerBox:true,
+                    fixed:true,
+                    textValue:''
+                },
+                showUpload:false,//显示上传图片
+                isEdit:false,//是否编辑资源类
+                isClassModel:false,//添加属性,添加类关系模块切换
             }
         },
         created() {
@@ -560,11 +648,13 @@
         },
         mounted() {
             this.initLayUI()
+            window.onload = function () {
+                NProgress.done();
+            }
         },
         methods: {
+            //表单验证
             layVerify(item){
-                // console.log('**********************')
-                // console.log(item)
                 var verify = ''
                 if(item.maxLength||item.minLength){
                     verify+='|length'
@@ -578,11 +668,12 @@
             initLayUI(){
                 var that = this
                 this.$nextTick(function(){
-                    layui.use(['element', 'table', 'form', 'jquery', 'laydate'], function () {
+                    layui.use(['element', 'table', 'form', 'upload', 'jquery', 'laydate'], function () {
                         that.LayUI = {
                             element: layui.element,
                             table: layui.table,
                             form: layui.form,
+                            upload: layui.upload,
                             $: layui.$,
                             laydate: layui.laydate,
                         }
@@ -788,8 +879,113 @@
                 })
 
             },
-            navEdit() {
+            //添加资源类
+            addResClass(item) {
+                var that = this
+                that.showUpload = true
+                this.$nextTick(()=>{
+                    this.LayUI.upload.render({
+                        elem: document.getElementById('uploadImg'), //绑定元素
+                        // ,url: '/upload/' //上传接口
+                        auto:false,
+                        choose:function(obj){
+                            //将每次选择的文件追加到文件队列
+                            var files = obj.pushFile();
+
+                            //预读本地文件，如果是多文件，则会遍历。(不支持ie8/9)
+                            obj.preview(function(index, file, result){
+                                console.log(index); //得到文件索引
+                                console.log(file); //得到文件对象
+                                console.log(result); //得到文件base64编码，比如图片
+                                that.uploadImgOption.img = result
+                                //obj.resetFile(index, file, '123.jpg'); //重命名文件名，layui 2.3.0 开始新增
+
+                                //这里还可以做一些 append 文件列表 DOM 的操作
+
+                                //obj.upload(index, file); //对上传失败的单个文件重新上传，一般在某个事件中使用
+                                //delete files[index]; //删除列表中对应的文件，一般在某个事件中使用
+                            });
+                        },
+                        before:function(obj){
+                            console.log(obj)
+                        },
+                        done: function(res){
+                            //上传完毕回调
+                        }
+                        ,error: function(){
+                            //请求异常回调
+                        }
+                    });
+                })
+                if(item.type!='click'){
+                    this.navEdit(item)
+                }
+            },
+            //保存截图
+            saveCropper(){
                 console.log(123)
+                // 获取截图的base64 数据
+                this.$refs.cropper.getCropData((data) => {
+                    console.log(data)
+                    this.uploadImgOption.curimg = data
+                    this.uploadImgOption.img = ''
+                })
+                // 获取截图的blob数据
+                this.$refs.cropper.getCropBlob((data) => {
+                    console.log(data)
+                })
+            },
+            //保存图片
+            saveImage(){
+                if(!this.uploadImgOption.textValue){ layer.msg('请输入资源类名称'); return; }
+                this.showUpload = false
+                //编辑状态修改left_nav
+                if(this.isEdit){
+                    this.left_nav.forEach((left)=>{
+                        if(left.id==this.isEditItem.id){
+                            left.name = this.uploadImgOption.textValue
+                            left.img = this.uploadImgOption.curimg
+                        }
+                    })
+                }else{//非编辑状态添加left_nav
+                    this.left_nav.push({
+                        id: this.left_nav.length,
+                        name: this.uploadImgOption.textValue,
+                        img: this.uploadImgOption.curimg,
+                        selected: false,
+                        //属性模块
+                        attr: [{
+                            title: '名称',//显示title
+                            type: 'text',//类型
+                            required: true,//是否必填
+                            hasRightText: true,//显示（名称为固定选项，不可去除；）
+                            value:'',//值
+                        }],
+                        //类关系
+                        class: {
+
+                        }
+                    })
+                }
+
+                this.uploadImgOption.img = ''
+                this.uploadImgOption.curimg = ''
+                this.uploadImgOption.textValue = ''
+                this.isEdit = false
+            },
+            //编辑左边导航
+            navEdit(item) {
+                console.log(item)
+                this.showUpload = true
+                this.isEdit = true
+                this.isEditItem = item
+                this.uploadImgOption.curimg = item.img
+                this.uploadImgOption.textValue = item.name
+
+            },
+            rand(e){
+                console.log(e)
+                return 'width:500px'
             }
         }
     })
