@@ -39,9 +39,9 @@
                                 <template>
                                     <div class="left-nav-item" v-for="item in left_nav" :key="item.id" :class="item.selected?'active':''" v-on:click="selectNav(item)">
                                         {{ item.name }}
-                                        <img src="images/edit.png" v-on:click.stop="addResClass(item)">
+                                        <img v-if="!isClassModel" src="images/edit.png" v-on:click.stop="addResClass(item)">
                                     </div>
-                                    <div class="left-nav-btn">
+                                    <div class="left-nav-btn" v-if="!isClassModel">
                                         <button class="layui-btn layui-btn-sm" v-on:click="addResClass">添加资源类</button>
                                     </div>
                                 </template>
@@ -123,11 +123,12 @@
                         </div>
                         <!--添加类关系-->
                         <div v-show="isClassModel" class="layui-col-xs10 class-model-box">
-                            <template>
-                                <div class="class-model-item-box">
+                            <button class="layui-btn tier-btn">添加层关系</button>
+                            <template >
+                                <div class="class-model-item-box" v-if="cur_select.class[0]">
                                     <div v-for="item of cur_select.class[0].children" class="class-model-item">
                                         <img :src="'images/'+item.type+'.png'">
-                                        <span style="position: absolute;top: 150%;">123</span>
+                                        <div style="position: absolute;top: 150%;left: 55%;white-space: nowrap;">{{item.state}}</div>
                                     </div>
                                 </div>
                                 <div v-for="item of cur_select.class" style="width: 100%;text-align: center;margin-top: 100px">
@@ -135,6 +136,8 @@
                                         <img :src="'images/'+item.type+'.png'" >
                                     </div>
                                 </div>
+                                <button class="layui-btn" style="margin-top: 20px">保存</button>
+                                <button class="layui-btn" style="margin-top: 20px">取消</button>
                             </template>
                         </div>
                     </div>
@@ -191,7 +194,7 @@
             </div>
         </div>
     </template>
-<!--上传图片-->
+    <!--上传图片-->
     <template v-if="showUpload">
         <div class="msg-box" >
             <div class="msg-box-bg"></div>
@@ -276,16 +279,20 @@
                         type:'server',
                         children:[{
                             name:'网络设备',
-                            type:'network'
+                            type:'network',
+                            state:'连接'
                         },{
                             name:'windows',
-                            type:'windows'
+                            type:'windows',
+                            state:'运行在'
                         },{
                             name:'虚拟机',
-                            type:'virtual'
+                            type:'virtual',
+                            state:'运行在'
                         },{
                             name:'数据库',
-                            type:'database'
+                            type:'database',
+                            state:'运行在'
                         }]
                     }]
                 },{
@@ -340,31 +347,26 @@
                                 lable: '默认值',
                                 value: '',
                                 type: 'text',
-                                required: false
                             },{
                                 name: 'required',
                                 lable: '是否必填',
                                 value: false,
                                 type: 'check',
-                                required: false
                             },{
                                 name: 'rules',
                                 lable: '校验规则',
                                 value: '',
                                 type: 'select',
-                                required: false
                             },{
                                 name: 'minLength',
                                 lable: '最小文本长度',
                                 value: '',
                                 type: 'number',
-                                required: false
                             },{
                                 name: 'maxLength',
                                 lable: '最大文本长度',
                                 value: '',
                                 type: 'number',
-                                required: false
                             }]
                     },{
                         title: "多行文本",
@@ -382,31 +384,26 @@
                                 lable: '默认值',
                                 value: '',
                                 type: 'text',
-                                required: false
                             },{
                                 name: 'required',
                                 lable: '是否必填',
                                 value: false,
                                 type: 'check',
-                                required: false
                             },{
                                 name: 'rules',
                                 lable: '校验规则',
                                 value: '',
                                 type: 'select',
-                                required: false
                             },{
                                 name: 'minLength',
                                 lable: '最小文本长度',
                                 value: '',
                                 type: 'number',
-                                required: false
                             },{
                                 name: 'maxLength',
                                 lable: '最大文本长度',
                                 value: '',
                                 type: 'number',
-                                required: false
                             }]
                     },{
                         title: "数值",
@@ -424,37 +421,31 @@
                                 lable: '默认值',
                                 value: '',
                                 type: 'text',
-                                required: false
                             },{
                                 name: 'unit',
                                 lable: '单位',
                                 value: '',
                                 type: 'text',
-                                required: false
                             },{
                                 name: 'required',
                                 lable: '是否必填',
                                 value: false,
                                 type: 'check',
-                                required: false
                             },{
                                 name: 'minDigit',
                                 lable: '最小位数',
                                 value: '',
                                 type: 'number',
-                                required: false
                             },{
                                 name: 'minLength',
                                 lable: '最小文本长度',
                                 value: '',
                                 type: 'number',
-                                required: false
                             },{
                                 name: 'maxLength',
                                 lable: '最大文本长度',
                                 value: '',
                                 type: 'number',
-                                required: false
                             }]
                     },{
                         title: "下拉",
